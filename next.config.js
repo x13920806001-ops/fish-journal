@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export',
   images: {
-    // 允许加载 Supabase 存储里的图片
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
