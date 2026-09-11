@@ -12,11 +12,20 @@ import {
   Category,
 } from '@/lib/categories';
 
+type RatingRow = {
+  entry_id: number;
+  score: number;
+  aspects: { id: number; name: string; sort_order: number }[] | null;
+};
+
 export default function HomePage() {
   const supabase = createClient();
 
   const [entries, setEntries] = useState<any[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [ratingsByEntry, setRatingsByEntry] = useState<
+    Record<number, { aspectName: string; score: number }[]>
+  >({});
   const [selectedCatId, setSelectedCatId] = useState<number | null>(null);
   const [keyword, setKeyword] = useState('');
   const [loading, setLoading] = useState(true);
@@ -24,12 +33,42 @@ export default function HomePage() {
 
   useEffect(() => {
     async function load() {
-      const [{ data: e }, { data: c }] = await Promise.all([
+      const [{ data: e }, { data: c }, { data: r }] = await Promise.all([
         supabase.from('entries').select('*').order('date', { ascending: false }),
         supabase.from('categories').select('*'),
+        supabase
+          .from('ratings')
+          .select('entry_id, score, aspects(id, name, sort_order)'),
       ]);
       setEntries(e || []);
       setCategories((c as Category[]) || []);
+
+      // 把评分按 entry_id 分组，并按方面 sort_order 排序
+      const grouped: Record<
+        number,
+        { aspectName: string; score: number; sort: number }[]
+      > = {};
+
+      ((r || []) as unknown as RatingRow[]).forEach((row) => {
+        const aspect = Array.isArray(row.aspects) ? row.aspects[0] : row.aspects;
+        if (!aspect) return;
+        if (!grouped[row.entry_id]) grouped[row.entry_id] = [];
+        grouped[row.entry_id].push({
+          aspectName: aspect.name,
+          score: Number(row.score),
+          sort: aspect.sort_order,
+        });
+      });
+
+      // 排序 + 去掉 sort 字段
+      const final: Record<number, { aspectName: string; score: number }[]> = {};
+      Object.entries(grouped).forEach(([id, arr]) => {
+        final[Number(id)] = arr
+          .sort((a, b) => a.sort - b.sort)
+          .map(({ aspectName, score }) => ({ aspectName, score }));
+      });
+      setRatingsByEntry(final);
+
       setLoading(false);
     }
     load();
@@ -37,7 +76,6 @@ export default function HomePage() {
 
   const tree = useMemo(() => buildTree(categories), [categories]);
 
-  // 分类 id → 路径字符串（"鱼 / 淡水"）
   const catPathMap = useMemo(() => {
     const map = new Map<number, string>();
     categories.forEach((c) => {
@@ -48,7 +86,6 @@ export default function HomePage() {
   }, [categories, tree]);
 
   const filtered = useMemo(() => {
-    // 选中分类时，包含它的所有后代分类下的内容
     let allowedIds: number[] | null = null;
     if (selectedCatId !== null) {
       allowedIds = getDescendantIds(tree, selectedCatId);
@@ -70,15 +107,15 @@ export default function HomePage() {
 
   return (
     <div>
-      {/* 标题区 */}
       <div className="mb-8">
         <h1 className="font-serif text-3xl text-[#1a1a1a] mb-2">记录</h1>
-        <p className="text-sm text-black/40">闲来无事，随便记记</p>
+        <p className="text-sm text-black/40">
+          养过的鱼、开过的花、走过的路、陪着的它
+        </p>
       </div>
 
       <SearchBar value={keyword} onChange={setKeyword} />
 
-      {/* 移动端：分类折叠按钮 */}
       <button
         onClick={() => setMobileTreeOpen(!mobileTreeOpen)}
         className="md:hidden mt-4 w-full text-left px-4 py-2.5 bg-white rounded-xl text-sm shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
@@ -87,7 +124,6 @@ export default function HomePage() {
       </button>
 
       <div className="mt-8 md:flex md:gap-8">
-        {/* 左侧分类树 */}
         <aside
           className={`md:w-48 md:flex-shrink-0 ${
             mobileTreeOpen ? 'block' : 'hidden md:block'
@@ -108,7 +144,6 @@ export default function HomePage() {
           </div>
         </aside>
 
-        {/* 右侧卡片 */}
         <div className="flex-1 mt-8 md:mt-0">
           {loading ? (
             <p className="text-black/30 text-center py-20 text-sm">加载中...</p>
@@ -121,6 +156,7 @@ export default function HomePage() {
                   key={item.id}
                   entry={item}
                   categoryPath={catPathMap.get(item.category_id)}
+                  ratings={ratingsByEntry[item.id] || []}
                 />
               ))}
             </div>

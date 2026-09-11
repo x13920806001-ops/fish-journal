@@ -1,14 +1,20 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import StarDisplay from './StarDisplay';
+
+type RatingItem = { aspectName: string; score: number };
 
 export default function EntryCard({
   entry,
   categoryPath,
+  ratings = [],
 }: {
   entry: any;
   categoryPath?: string;
+  ratings?: RatingItem[];
 }) {
   const excerpt = (entry.content || '').replace(/[#*`>\-]/g, '').slice(0, 70);
+  const topRatings = ratings.slice(0, 2); // 只显示前两项
 
   return (
     <Link
@@ -38,6 +44,19 @@ export default function EntryCard({
         <h3 className="font-serif text-lg text-[#1a1a1a] leading-snug mb-2 line-clamp-1">
           {entry.title}
         </h3>
+
+        {/* 评分（前两项） */}
+        {topRatings.length > 0 && (
+          <div className="space-y-1 mb-3">
+            {topRatings.map((r, i) => (
+              <div key={i} className="flex items-center gap-2 text-xs">
+                <span className="text-black/50 min-w-14 truncate">{r.aspectName}</span>
+                <StarDisplay value={r.score} size={12} />
+              </div>
+            ))}
+          </div>
+        )}
+
         <p className="text-sm text-black/50 leading-relaxed line-clamp-2">
           {excerpt}
         </p>
