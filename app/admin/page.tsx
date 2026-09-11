@@ -1,35 +1,49 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
+import { buildTree, findPath, Category } from '@/lib/categories';
 
 export default function AdminPage() {
   const supabase = createClient();
   const router = useRouter();
   const [entries, setEntries] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
   async function load() {
-    const { data } = await supabase
-      .from('entries')
-      .select('*')
-      .order('date', { ascending: false });
-    setEntries(data || []);
+    const [{ data: e }, { data: c }] = await Promise.all([
+      supabase.from('entries').select('*').order('date', { ascending: false }),
+      supabase.from('categories').select('*'),
+    ]);
+    setEntries(e || []);
+    setCategories((c as Category[]) || []);
     setLoading(false);
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
+
+  const tree = useMemo(() => buildTree(categories), [categories]);
+
+  // 分类 id → "鱼 / 淡水"
+  const catPathMap = useMemo(() => {
+    const map = new Map<number, string>();
+    categories.forEach((c) => {
+      const path = findPath(tree, c.id);
+      map.set(c.id, path.map((n) => n.name).join(' / '));
+    });
+    return map;
+  }, [categories, tree]);
 
   async function handleDelete(id: number) {
     if (!confirm('确定删除这条记录？删除后不可恢复。')) return;
     const { error } = await supabase.from('entries').delete().eq('id', id);
-    if (error) {
-      alert('删除失败：' + error.message);
-    } else {
-      load();
-    }
+    if (error) alert('删除失败：' + error.message);
+    else load();
   }
 
   async function handleLogout() {
@@ -43,10 +57,22 @@ export default function AdminPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">后台管理</h1>
         <div className="flex gap-3">
-          <Link href="/admin/new" className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800">
+          <Link
+            href="/admin/categories"
+            className="border px-4 py-2 rounded hover:bg-gray-100 text-sm"
+          >
+            分类管理
+          </Link>
+          <Link
+            href="/admin/new"
+            className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 text-sm"
+          >
             + 新建条目
           </Link>
-          <button onClick={handleLogout} className="border px-4 py-2 rounded hover:bg-gray-100">
+          <button
+            onClick={handleLogout}
+            className="border px-4 py-2 rounded hover:bg-gray-100 text-sm"
+          >
             退出登录
           </button>
         </div>
@@ -71,11 +97,20 @@ export default function AdminPage() {
               {entries.map((e) => (
                 <tr key={e.id} className="border-t">
                   <td className="px-4 py-2">{e.title}</td>
-                  <td className="px-4 py-2">{e.category}{e.subcategory ? ` / ${e.subcategory}` : ''}</td>
+                  <td className="px-4 py-2 text-black/60">
+                    {e.category_id ? catPathMap.get(e.category_id) || '—' : '—'}
+                  </td>
                   <td className="px-4 py-2">{e.date}</td>
                   <td className="px-4 py-2 text-right space-x-3">
-                    <Link href={`/admin/edit/${e.id}`} className="text-blue-600 hover:underline">编辑</Link>
-                    <button onClick={() => handleDelete(e.id)} className="text-red-600 hover:underline">删除</button>
+                    <Link href={`/admin/edit/${e.id}`} className="text-blue-600 hover:underline">
+                      编辑
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(e.id)}
+                      className="text-red-600 hover:underline"
+                    >
+                      删除
+                    </button>
                   </td>
                 </tr>
               ))}

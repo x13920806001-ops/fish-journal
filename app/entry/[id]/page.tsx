@@ -3,6 +3,7 @@ import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { createClient } from '@/lib/supabase-server';
+import { buildTree, findPath, Category } from '@/lib/categories';
 
 export default async function EntryPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
@@ -14,6 +15,17 @@ export default async function EntryPage({ params }: { params: { id: string } }) 
     .single();
 
   if (!entry) return notFound();
+
+  // 查分类（用于显示路径）
+  let categoryPath = '';
+  if (entry.category_id) {
+    const { data: cats } = await supabase.from('categories').select('*');
+    if (cats) {
+      const tree = buildTree(cats as Category[]);
+      const path = findPath(tree, entry.category_id);
+      categoryPath = path.map((n) => n.name).join(' / ');
+    }
+  }
 
   return (
     <article className="max-w-2xl mx-auto">
@@ -27,8 +39,12 @@ export default async function EntryPage({ params }: { params: { id: string } }) 
 
       <div className="text-xs tracking-widest text-black/40 mt-4 flex flex-wrap gap-3">
         <span>{entry.date}</span>
-        <span>·</span>
-        <span>{entry.category}{entry.subcategory ? ` / ${entry.subcategory}` : ''}</span>
+        {categoryPath && (
+          <>
+            <span>·</span>
+            <span>{categoryPath}</span>
+          </>
+        )}
         {(entry.tags || []).length > 0 && (
           <>
             <span>·</span>

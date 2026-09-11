@@ -1,7 +1,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
 
-export default function EntryCard({ entry }: { entry: any }) {
+export default function EntryCard({
+  entry,
+  categoryPath,
+}: {
+  entry: any;
+  categoryPath?: string;
+}) {
   const excerpt = (entry.content || '').replace(/[#*`>\-]/g, '').slice(0, 70);
 
   return (
@@ -9,7 +15,6 @@ export default function EntryCard({ entry }: { entry: any }) {
       href={`/entry/${entry.id}`}
       className="group block bg-white rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300"
     >
-      {/* 封面 4:3 */}
       <div className="relative aspect-[4/3] bg-[#ecebe7] overflow-hidden">
         {entry.cover_image ? (
           <Image
@@ -25,11 +30,10 @@ export default function EntryCard({ entry }: { entry: any }) {
         )}
       </div>
 
-      {/* 文字 */}
       <div className="p-5">
         <div className="text-[11px] tracking-widest text-black/40 mb-2">
-          {entry.date} · {entry.category}
-          {entry.subcategory ? ` / ${entry.subcategory}` : ''}
+          {entry.date}
+          {categoryPath ? ` · ${categoryPath}` : ''}
         </div>
         <h3 className="font-serif text-lg text-[#1a1a1a] leading-snug mb-2 line-clamp-1">
           {entry.title}

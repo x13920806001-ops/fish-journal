@@ -4,15 +4,16 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 import ImageUploader from '@/components/ImageUploader';
+import CategoryPicker from '@/components/CategoryPicker';
+import { Category } from '@/lib/categories';
 
 export default function EditEntryPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
   const router = useRouter();
 
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('');
-  const [subcategory, setSubcategory] = useState('');
+  const [categoryId, setCategoryId] = useState<number | null>(null);
   const [content, setContent] = useState('');
   const [date, setDate] = useState('');
   const [tagsInput, setTagsInput] = useState('');
@@ -27,11 +28,10 @@ export default function EditEntryPage({ params }: { params: { id: string } }) {
         supabase.from('categories').select('*').order('sort_order'),
         supabase.from('entries').select('*').eq('id', params.id).single(),
       ]);
-      setCategories(c || []);
+      setCategories((c as Category[]) || []);
       if (e) {
         setTitle(e.title || '');
-        setCategory(e.category || '');
-        setSubcategory(e.subcategory || '');
+        setCategoryId(e.category_id ?? null);
         setContent(e.content || '');
         setDate(e.date || '');
         setTagsInput((e.tags || []).join(', '));
@@ -43,29 +43,24 @@ export default function EditEntryPage({ params }: { params: { id: string } }) {
     load();
   }, [params.id]);
 
-  const topCategories = categories.filter((c) => !c.parent_id);
-  const currentTop = categories.find((c) => c.name === category);
-  const subCategories = categories.filter((c) => c.parent_id === currentTop?.id);
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
 
-    const tags = tagsInput
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean);
+    const tags = tagsInput.split(',').map((t) => t.trim()).filter(Boolean);
 
-    const { error } = await supabase.from('entries').update({
-      title,
-      category,
-      subcategory,
-      content,
-      cover_image: coverImage,
-      images,
-      tags,
-      date,
-    }).eq('id', params.id);
+    const { error } = await supabase
+      .from('entries')
+      .update({
+        title,
+        category_id: categoryId,
+        content,
+        cover_image: coverImage,
+        images,
+        tags,
+        date,
+      })
+      .eq('id', params.id);
 
     setSaving(false);
 
@@ -90,21 +85,13 @@ export default function EditEntryPage({ params }: { params: { id: string } }) {
           <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full border rounded px-3 py-2" />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm mb-1">分类 *</label>
-            <select value={category} onChange={(e) => { setCategory(e.target.value); setSubcategory(''); }} className="w-full border rounded px-3 py-2">
-              <option value="">请选择</option>
-              {topCategories.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm mb-1">子分类（可选）</label>
-            <select value={subcategory} onChange={(e) => setSubcategory(e.target.value)} disabled={subCategories.length === 0} className="w-full border rounded px-3 py-2 disabled:bg-gray-100">
-              <option value="">无</option>
-              {subCategories.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
-            </select>
-          </div>
+        <div>
+          <label className="block text-sm mb-1">分类 *</label>
+          <CategoryPicker
+            categories={categories}
+            value={categoryId}
+            onChange={setCategoryId}
+          />
         </div>
 
         <div>
@@ -131,7 +118,13 @@ export default function EditEntryPage({ params }: { params: { id: string } }) {
               {images.map((url, i) => (
                 <div key={i} className="relative">
                   <img src={url} alt="" className="w-20 h-20 object-cover rounded border" />
-                  <button type="button" onClick={() => setImages(images.filter((_, idx) => idx !== i))} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs">×</button>
+                  <button
+                    type="button"
+                    onClick={() => setImages(images.filter((_, idx) => idx !== i))}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs"
+                  >
+                    ×
+                  </button>
                 </div>
               ))}
             </div>
