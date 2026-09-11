@@ -13,7 +13,7 @@ export default function SearchBar({ value, onChange }: Props) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="搜索标题、内容或标签..."
-        className="w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-black/10"
+        className="w-full bg-white border-0 rounded-xl px-5 py-3.5 text-sm shadow-[0_1px_3px_rgba(0,0,0,0.04)] focus:outline-none focus:ring-2 focus:ring-black/5 placeholder:text-black/30"
       />
     </div>
   );

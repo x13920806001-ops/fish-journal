@@ -16,7 +16,6 @@ export default function HomePage() {
   const [keyword, setKeyword] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // 加载数据
   useEffect(() => {
     async function load() {
       const [{ data: e }, { data: c }] = await Promise.all([
@@ -30,13 +29,10 @@ export default function HomePage() {
     load();
   }, []);
 
-  // 根据筛选条件过滤
   const filtered = useMemo(() => {
     return entries.filter((item) => {
-      // 分类筛选
       if (selectedCategory !== '全部' && item.category !== selectedCategory) return false;
       if (selectedSub !== '全部' && item.subcategory !== selectedSub) return false;
-      // 搜索：标题 + 内容 + 标签
       if (keyword.trim()) {
         const kw = keyword.toLowerCase();
         const hit =
@@ -51,6 +47,12 @@ export default function HomePage() {
 
   return (
     <div>
+      {/* 标题区 */}
+      <div className="mb-8">
+        <h1 className="font-serif text-3xl text-[#1a1a1a] mb-2">记录</h1>
+        <p className="text-sm text-black/40">养过的鱼、开过的花、走过的路、陪着的它</p>
+      </div>
+
       {/* 搜索框 */}
       <SearchBar value={keyword} onChange={setKeyword} />
 
@@ -65,11 +67,11 @@ export default function HomePage() {
 
       {/* 卡片网格 */}
       {loading ? (
-        <p className="text-gray-400 text-center py-12">加载中...</p>
+        <p className="text-black/30 text-center py-20 text-sm">加载中...</p>
       ) : filtered.length === 0 ? (
-        <p className="text-gray-400 text-center py-12">还没有内容</p>
+        <p className="text-black/30 text-center py-20 text-sm">还没有内容</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
           {filtered.map((item) => (
             <EntryCard key={item.id} entry={item} />
           ))}

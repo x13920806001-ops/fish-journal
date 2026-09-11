@@ -3,6 +3,41 @@
 @tailwind utilities;
 
 html, body {
-  background: #fafafa;
-  color: #222;
+  background: #f7f6f3;
+  color: #2c2c2c;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 文章正文（Markdown 渲染）的排版 */
+.prose {
+  line-height: 1.9;
+  font-size: 16px;
+  color: #3a3a3a;
+}
+.prose h1, .prose h2, .prose h3 {
+  font-weight: 600;
+  margin: 1.6em 0 0.6em;
+  color: #1a1a1a;
+}
+.prose h1 { font-size: 1.6em; }
+.prose h2 { font-size: 1.3em; }
+.prose h3 { font-size: 1.1em; }
+.prose p { margin: 1em 0; }
+.prose ul, .prose ol { padding-left: 1.4em; margin: 1em 0; }
+.prose li { margin: 0.4em 0; }
+.prose img { border-radius: 12px; margin: 1.5em 0; }
+.prose blockquote {
+  border-left: 3px solid #d4d4d4;
+  padding-left: 1em;
+  color: #666;
+  margin: 1.2em 0;
+}
+.prose a { color: #1a1a1a; text-decoration: underline; text-underline-offset: 3px; }
+.prose code {
+  background: #f0efec;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
 }

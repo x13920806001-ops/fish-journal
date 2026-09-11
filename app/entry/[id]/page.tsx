@@ -16,15 +16,16 @@ export default async function EntryPage({ params }: { params: { id: string } }) 
   if (!entry) return notFound();
 
   return (
-    <article className="max-w-3xl mx-auto">
-      {/* 返回 */}
-      <a href="/" className="text-sm text-gray-500 hover:text-black">← 返回首页</a>
+    <article className="max-w-2xl mx-auto">
+      <a href="/" className="text-xs tracking-widest text-black/40 hover:text-black transition">
+        ← 返回
+      </a>
 
-      {/* 标题 */}
-      <h1 className="text-3xl font-bold mt-4">{entry.title}</h1>
+      <h1 className="font-serif text-3xl md:text-4xl text-[#1a1a1a] mt-6 leading-tight">
+        {entry.title}
+      </h1>
 
-      {/* 元信息 */}
-      <div className="text-sm text-gray-500 mt-2 flex flex-wrap gap-3">
+      <div className="text-xs tracking-widest text-black/40 mt-4 flex flex-wrap gap-3">
         <span>{entry.date}</span>
         <span>·</span>
         <span>{entry.category}{entry.subcategory ? ` / ${entry.subcategory}` : ''}</span>
@@ -36,23 +37,20 @@ export default async function EntryPage({ params }: { params: { id: string } }) 
         )}
       </div>
 
-      {/* 封面图 */}
       {entry.cover_image && (
-        <div className="relative w-full aspect-video mt-6 rounded-lg overflow-hidden bg-gray-100">
+        <div className="relative w-full aspect-[4/3] mt-8 rounded-2xl overflow-hidden bg-[#ecebe7]">
           <Image src={entry.cover_image} alt={entry.title} fill className="object-cover" />
         </div>
       )}
 
-      {/* 正文（Markdown） */}
-      <div className="prose prose-neutral max-w-none mt-6">
+      <div className="prose mt-10">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{entry.content || ''}</ReactMarkdown>
       </div>
 
-      {/* 更多图片 */}
       {(entry.images || []).length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-12">
           {entry.images.map((url: string, i: number) => (
-            <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
+            <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-[#ecebe7]">
               <Image src={url} alt={`${entry.title}-${i}`} fill className="object-cover" />
             </div>
           ))}

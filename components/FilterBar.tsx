@@ -15,44 +15,42 @@ export default function FilterBar({
   onCategoryChange,
   onSubChange,
 }: Props) {
-  // 顶级分类
   const topCategories = categories.filter((c) => !c.parent_id);
-  // 当前选中分类下的子分类
   const currentTop = categories.find((c) => c.name === selectedCategory);
   const subCategories = categories.filter((c) => c.parent_id === currentTop?.id);
 
+  const chip = (active: boolean) =>
+    `px-4 py-1.5 rounded-full text-sm transition-all duration-200 ${
+      active
+        ? 'bg-[#1a1a1a] text-white shadow-sm'
+        : 'bg-white text-black/60 hover:text-black hover:bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]'
+    }`;
+
   return (
     <div className="mt-6 space-y-3">
-      {/* 顶级分类按钮 */}
       <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => onCategoryChange('全部')}
-          className={`px-4 py-1.5 rounded-full text-sm border ${
-            selectedCategory === '全部' ? 'bg-black text-white border-black' : 'bg-white hover:bg-gray-50'
-          }`}
-        >
+        <button onClick={() => onCategoryChange('全部')} className={chip(selectedCategory === '全部')}>
           全部
         </button>
         {topCategories.map((c) => (
           <button
             key={c.id}
             onClick={() => onCategoryChange(c.name)}
-            className={`px-4 py-1.5 rounded-full text-sm border ${
-              selectedCategory === c.name ? 'bg-black text-white border-black' : 'bg-white hover:bg-gray-50'
-            }`}
+            className={chip(selectedCategory === c.name)}
           >
             {c.name}
           </button>
         ))}
       </div>
 
-      {/* 子分类按钮（只有当前分类有子类时才显示） */}
       {subCategories.length > 0 && (
-        <div className="flex flex-wrap gap-2 pl-2">
+        <div className="flex flex-wrap gap-2 pl-1">
           <button
             onClick={() => onSubChange('全部')}
-            className={`px-3 py-1 rounded-full text-xs border ${
-              selectedSub === '全部' ? 'bg-gray-800 text-white border-gray-800' : 'bg-white hover:bg-gray-50'
+            className={`px-3 py-1 rounded-full text-xs transition ${
+              selectedSub === '全部'
+                ? 'bg-black/70 text-white'
+                : 'text-black/40 hover:text-black'
             }`}
           >
             全部
@@ -61,8 +59,10 @@ export default function FilterBar({
             <button
               key={c.id}
               onClick={() => onSubChange(c.name)}
-              className={`px-3 py-1 rounded-full text-xs border ${
-                selectedSub === c.name ? 'bg-gray-800 text-white border-gray-800' : 'bg-white hover:bg-gray-50'
+              className={`px-3 py-1 rounded-full text-xs transition ${
+                selectedSub === c.name
+                  ? 'bg-black/70 text-white'
+                  : 'text-black/40 hover:text-black'
               }`}
             >
               {c.name}
