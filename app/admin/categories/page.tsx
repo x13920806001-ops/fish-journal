@@ -181,6 +181,25 @@ export default function CategoriesPage() {
 }
 
 // ============ 树形行组件 ============
+type TreeNodeRowProps = {
+  node: CategoryNode;
+  depth: number;
+  editingId: number | null;
+  editingName: string;
+  addingChildTo: number | null;
+  newChildName: string;
+  onStartEdit: (id: number, name: string) => void;
+  onCancelEdit: () => void;
+  onEditNameChange: (v: string) => void;
+  onSaveEdit: (id: number) => void;
+  onDelete: (id: number, name: string) => void;
+  onStartAddChild: (id: number) => void;
+  onCancelAddChild: () => void;
+  onChildNameChange: (v: string) => void;
+  onSaveAddChild: (id: number) => void;
+  onMove: (id: number, direction: 'up' | 'down') => void;
+};
+
 function TreeNodeRow({
   node,
   depth,
@@ -198,7 +217,7 @@ function TreeNodeRow({
   onChildNameChange,
   onSaveAddChild,
   onMove,
-}: any) {
+}: TreeNodeRowProps) {
   const [open, setOpen] = useState(true);
   const hasChildren = node.children.length > 0;
   const isEditing = editingId === node.id;
@@ -210,7 +229,6 @@ function TreeNodeRow({
         className="flex items-center gap-2 py-1.5 group"
         style={{ paddingLeft: `${depth * 16}px` }}
       >
-        {/* 展开箭头 */}
         {hasChildren ? (
           <button
             onClick={() => setOpen(!open)}
@@ -222,7 +240,6 @@ function TreeNodeRow({
           <span className="w-5" />
         )}
 
-        {/* 名字 / 编辑框 */}
         {isEditing ? (
           <>
             <input
@@ -231,16 +248,10 @@ function TreeNodeRow({
               className="flex-1 border rounded px-2 py-1 text-sm"
               autoFocus
             />
-            <button
-              onClick={() => onSaveEdit(node.id)}
-              className="text-xs text-blue-600 hover:underline"
-            >
+            <button onClick={() => onSaveEdit(node.id)} className="text-xs text-blue-600 hover:underline">
               保存
             </button>
-            <button
-              onClick={onCancelEdit}
-              className="text-xs text-black/40 hover:underline"
-            >
+            <button onClick={onCancelEdit} className="text-xs text-black/40 hover:underline">
               取消
             </button>
           </>
@@ -248,49 +259,18 @@ function TreeNodeRow({
           <>
             <span className="flex-1 text-sm">{node.name}</span>
             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition text-xs">
-              <button
-                onClick={() => onMove(node.id, 'up')}
-                className="text-black/40 hover:text-black"
-                title="上移"
-              >
-                ↑
-              </button>
-              <button
-                onClick={() => onMove(node.id, 'down')}
-                className="text-black/40 hover:text-black"
-                title="下移"
-              >
-                ↓
-              </button>
-              <button
-                onClick={() => onStartEdit(node.id, node.name)}
-                className="text-blue-600 hover:underline"
-              >
-                改名
-              </button>
-              <button
-                onClick={() => onStartAddChild(node.id)}
-                className="text-blue-600 hover:underline"
-              >
-                +子分类
-              </button>
-              <button
-                onClick={() => onDelete(node.id, node.name)}
-                className="text-red-600 hover:underline"
-              >
-                删除
-              </button>
+              <button onClick={() => onMove(node.id, 'up')} className="text-black/40 hover:text-black" title="上移">↑</button>
+              <button onClick={() => onMove(node.id, 'down')} className="text-black/40 hover:text-black" title="下移">↓</button>
+              <button onClick={() => onStartEdit(node.id, node.name)} className="text-blue-600 hover:underline">改名</button>
+              <button onClick={() => onStartAddChild(node.id)} className="text-blue-600 hover:underline">+子分类</button>
+              <button onClick={() => onDelete(node.id, node.name)} className="text-red-600 hover:underline">删除</button>
             </div>
           </>
         )}
       </div>
 
-      {/* 添加子分类的输入框 */}
       {isAddingChild && (
-        <div
-          className="flex gap-2 py-2"
-          style={{ paddingLeft: `${(depth + 1) * 16 + 20}px` }}
-        >
+        <div className="flex gap-2 py-2" style={{ paddingLeft: `${(depth + 1) * 16 + 20}px` }}>
           <input
             value={newChildName}
             onChange={(e) => onChildNameChange(e.target.value)}
@@ -298,22 +278,11 @@ function TreeNodeRow({
             className="flex-1 border rounded px-2 py-1 text-sm"
             autoFocus
           />
-          <button
-            onClick={() => onSaveAddChild(node.id)}
-            className="text-xs text-blue-600 hover:underline"
-          >
-            添加
-          </button>
-          <button
-            onClick={onCancelAddChild}
-            className="text-xs text-black/40 hover:underline"
-          >
-            取消
-          </button>
+          <button onClick={() => onSaveAddChild(node.id)} className="text-xs text-blue-600 hover:underline">添加</button>
+          <button onClick={onCancelAddChild} className="text-xs text-black/40 hover:underline">取消</button>
         </div>
       )}
 
-      {/* 子节点 */}
       {hasChildren && open && (
         <div>
           {node.children.map((child: CategoryNode) => (
