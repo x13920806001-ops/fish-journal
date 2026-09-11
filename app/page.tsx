@@ -43,7 +43,6 @@ export default function HomePage() {
       setEntries(e || []);
       setCategories((c as Category[]) || []);
 
-      // 把评分按 entry_id 分组，并按方面 sort_order 排序
       const grouped: Record<
         number,
         { aspectName: string; score: number; sort: number }[]
@@ -60,7 +59,6 @@ export default function HomePage() {
         });
       });
 
-      // 排序 + 去掉 sort 字段
       const final: Record<number, { aspectName: string; score: number }[]> = {};
       Object.entries(grouped).forEach(([id, arr]) => {
         final[Number(id)] = arr
@@ -108,10 +106,8 @@ export default function HomePage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="font-serif text-3xl text-[#1a1a1a] mb-2">记录</h1>
-        <p className="text-sm text-black/40">
-          养过的鱼、开过的花、走过的路、陪着的它
-        </p>
+        <h1 className="font-serif text-3xl text-[#1a1a1a] mb-2">瞎记</h1>
+        <p className="text-sm text-black/40">养点儿鱼，盘点儿串儿</p>
       </div>
 
       <SearchBar value={keyword} onChange={setKeyword} />

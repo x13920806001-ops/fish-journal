@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: '闲白儿',
-  description: '记录我养过的鱼、花、旅行和宠物',
+  description: '养点儿鱼，盘点儿串儿',
 };
 
 export default function RootLayout({
@@ -24,7 +24,7 @@ export default function RootLayout({
               href="/admin"
               className="text-xs tracking-widest text-black/40 hover:text-black transition"
             >
-              后台
+              进屋
             </a>
           </div>
         </header>
@@ -32,7 +32,7 @@ export default function RootLayout({
         <main className="max-w-5xl mx-auto px-6 py-10">{children}</main>
 
         <footer className="text-center text-xs tracking-widest text-black/30 py-16">
-          © {new Date().getFullYear()} 闲白儿
+          闲白儿
         </footer>
       </body>
     </html>
