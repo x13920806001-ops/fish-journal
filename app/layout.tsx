@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: '我的图文记录',
+  title: '闲白儿',
   description: '记录我养过的鱼、花、旅行和宠物',
 };
 
@@ -18,7 +18,7 @@ export default function RootLayout({
         <header className="border-b border-black/5 bg-[#f7f6f3]/80 backdrop-blur-sm sticky top-0 z-10">
           <div className="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
             <a href="/" className="text-lg font-medium tracking-wide text-[#1a1a1a]">
-              我的图文记录
+              闲白儿
             </a>
             <a
               href="/admin"
@@ -32,7 +32,7 @@ export default function RootLayout({
         <main className="max-w-5xl mx-auto px-6 py-10">{children}</main>
 
         <footer className="text-center text-xs tracking-widest text-black/30 py-16">
-          © {new Date().getFullYear()} 我的图文记录
+          © {new Date().getFullYear()} 闲白儿
         </footer>
       </body>
     </html>

@@ -73,7 +73,7 @@ export default function HomePage() {
       {/* 标题区 */}
       <div className="mb-8">
         <h1 className="font-serif text-3xl text-[#1a1a1a] mb-2">记录</h1>
-        <p className="text-sm text-black/40">养过的鱼、开过的花、走过的路、陪着的它</p>
+        <p className="text-sm text-black/40">闲来无事，随便记记</p>
       </div>
 
       <SearchBar value={keyword} onChange={setKeyword} />
